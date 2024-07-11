@@ -6,7 +6,7 @@
 
 ## 使用方法
 
-> 先部署好 CosyVoice，具体部署方法参考 [CosyVoice](https://github.com/FunAudioLLM/CosyVoice)，如果是windows部署，可参考博客文章
+> 先部署好 CosyVoice，具体部署方法参考 [CosyVoice](https://github.com/FunAudioLLM/CosyVoice)，如果是windows部署，可参考博客文章 https://juejin.cn/spost/7389946395066368035
 
 1. 下载本仓库中 api.py 文件，然后复制到 CosyVoice 项目下同 webui.py 放于同一目录中
 2. 安装模块 `flask`和`waitress`, 安装命令 `pip install flask waitress`
