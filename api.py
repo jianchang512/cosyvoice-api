@@ -89,10 +89,10 @@ def get_params(req):
         params['role']=role
     
     # 要克隆的音色文件    
-    params['reference_audio'] = req.args.get("reference_audio",None).strip() or req.form.get("reference_audio",None)
+    params['reference_audio'] = req.args.get("reference_audio",'').strip() or req.form.get("reference_audio",'')
     
     # 音色文件对应文本
-    params['reference_text'] = req.args.get("reference_text",None).strip() or req.form.get("reference_text",None)
+    params['reference_text'] = req.args.get("reference_text",'').strip() or req.form.get("reference_text",'')
     
     return params
 
