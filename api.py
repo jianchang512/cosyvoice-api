@@ -13,6 +13,7 @@ from cosyvoice.cli.cosyvoice import CosyVoice
 from cosyvoice.utils.file_utils import load_wav
 import torchaudio
 from pathlib import Path
+import base64
 
 root_dir=Path(os.getcwd()).as_posix()
 tmp_dir=Path(f'{root_dir}/tmp').as_posix()
@@ -30,9 +31,10 @@ if not os.path.exists('pretrained_models/CosyVoice-300M/cosyvoice.yaml') or not 
 
 # 预加载SFT模型
 tts_model = CosyVoice('pretrained_models/CosyVoice-300M-SFT')
+#tts_model = None
 # 懒加载clone模型，在第一次克隆时加载
 clone_model = None
-
+#clone_model = CosyVoice('pretrained_models/CosyVoice-300M')
 
 
 '''
@@ -62,14 +64,32 @@ file_handler.setFormatter(formatter)
 # 将文件处理器添加到日志记录器中
 app.logger.addHandler(file_handler)
 
+
+def base64_to_wav(encoded_str, output_path):
+    if not encoded_str:
+        raise ValueError("Base64 encoded string is empty.")
+
+    # 将base64编码的字符串解码为字节
+    wav_bytes = base64.b64decode(encoded_str)
+
+    # 检查输出路径是否存在，如果不存在则创建
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+
+    # 将解码后的字节写入文件
+    with open(output_path, "wb") as wav_file:
+        wav_file.write(wav_bytes)
+
+    print(f"WAV file has been saved to {output_path}")
+
+
 # 获取请求参数
 def get_params(req):
     params={
         "text":"",
-        "lang":None,
+        "lang":"",
         "role":"中文女",
         "reference_audio":None,
-        "reference_text":None
+        "reference_text":""
     }
     # 原始字符串
     params['text'] = req.args.get("text","").strip() or req.form.get("text","").strip()
@@ -89,8 +109,12 @@ def get_params(req):
         params['role']=role
     
     # 要克隆的音色文件    
-    params['reference_audio'] = req.args.get("reference_audio",'').strip() or req.form.get("reference_audio",'')
-    
+    params['reference_audio'] = req.args.get("reference_audio",None) or req.form.get("reference_audio",None)
+    encode=req.args.get('encode','') or req.form.get('encode','')
+    if  encode=='base64':
+        tmp_name=f'tmp/{time.time()}-clone-{len(params["reference_audio"])}.wav'
+        base64_to_wav(params['reference_audio'],root_dir+'/'+tmp_name)
+        params['reference_audio']=tmp_name
     # 音色文件对应文本
     params['reference_text'] = req.args.get("reference_text",'').strip() or req.form.get("reference_text",'')
     
@@ -108,6 +132,8 @@ def batch(tts_type,outname,params):
     out_list=[]
     prompt_speech_16k=None
     if tts_type!='tts':
+        if not params['reference_audio'] or not os.path.exists(f"{root_dir}/{params['reference_audio']}"):
+            raise Exception(f'参考音频未传入或不存在 {params["reference_audio"]}')
         prompt_speech_16k = load_wav(params['reference_audio'], 16000)
     for i,t in enumerate(text):
         tmp_name=f"{tmp_dir}/{time.time()}-{i}-{tts_type}.wav"
