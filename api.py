@@ -136,6 +136,8 @@ def batch(tts_type,outname,params):
             raise Exception(f'参考音频未传入或不存在 {params["reference_audio"]}')
         prompt_speech_16k = load_wav(params['reference_audio'], 16000)
     for i,t in enumerate(text):
+        if not t.strip():
+            continue
         tmp_name=f"{tmp_dir}/{time.time()}-{i}-{tts_type}.wav"
         print(f'{t=}\n{tmp_name=},\n{tts_type=}\n{params=}')
         if tts_type=='tts':
@@ -149,10 +151,12 @@ def batch(tts_type,outname,params):
             output = clone_model.inference_cross_lingual(f'<|{params["lang"]}|>{t}', prompt_speech_16k)
         torchaudio.save(tmp_name, output['tts_speech'], 22050)
         out_list.append(tmp_name)
+    if len(out_list)==0:
+        raise Exception('合成失败')
     if len(out_list)==1:
         return out_list[0]
     # 将 多个音频片段连接
-    txt_tmp="\n".join([f"file '{tmp_dir}/{it}'" for it in out_list])
+    txt_tmp="\n".join([f"file '{it}'" for it in out_list])
     txt_name=f'{time.time()}.txt'
     with open(f'{tmp_dir}/{txt_name}','w',encoding='utf-8') as f:
         f.write(txt_tmp)
@@ -185,7 +189,7 @@ def tts():
         print(e)
         return make_response(jsonify({"code":2,"msg":str(e)}), 500)  # 设置状态码为500
     else:
-        return send_file(outname, mimetype='audio/x-wav')
+        return send_file(f'{tmp_dir}/'+outname, mimetype='audio/x-wav')
     
 
 # 同一种语言音色克隆
@@ -207,7 +211,7 @@ def clone_eq():
     except Exception as e:
         return make_response(jsonify({"code":5,"msg":str(e)}), 500)  # 设置状态码为500
     else:
-        return send_file(outname, mimetype='audio/x-wav')
+        return send_file(f'{tmp_dir}/'+outname, mimetype='audio/x-wav')
 
 # 跨语言文字合成语音        
 @app.route('/clone_mul', methods=['GET', 'POST'])        
@@ -228,7 +232,7 @@ def clone_mul():
     except Exception as e:
         return make_response(jsonify({"code":8,"msg":str(e)}), 500)  # 设置状态码为500
     else:
-        return send_file(outname, mimetype='audio/x-wav')
+        return send_file(f'{tmp_dir}/'+outname, mimetype='audio/x-wav')
         
 if __name__=='__main__':
     host='127.0.0.1'
