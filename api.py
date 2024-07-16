@@ -25,6 +25,13 @@ os.makedirs(tmp_dir,exist_ok=True)
 os.makedirs(logs_dir,exist_ok=True)
 os.makedirs(f'{root_dir}/pretrained_models',exist_ok=True)
 
+# ffmpeg
+if sys.platform == 'win32':
+    os.environ['PATH'] = f'{root_dir}/third_party/Matcha-TTS;' + os.environ['PATH']
+
+else:
+    os.environ['PATH'] =  f'{root_dir}/third_party/Matcha-TTS:' +  os.environ['PATH']
+
 if not os.path.exists('pretrained_models/CosyVoice-300M/cosyvoice.yaml') or not os.path.exists('pretrained_models/CosyVoice-300M-SFT/cosyvoice.yaml'):
     snapshot_download('iic/CosyVoice-300M', cache_dir='pretrained_models/CosyVoice-300M',local_dir='pretrained_models/CosyVoice-300M')
     snapshot_download('iic/CosyVoice-300M-SFT', cache_dir='pretrained_models/CosyVoice-300M-SFT',local_dir='pretrained_models/CosyVoice-300M-SFT')
