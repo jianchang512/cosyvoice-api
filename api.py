@@ -168,7 +168,7 @@ def batch(tts_type,outname,params):
                    check=True,
                    text=True,
                    creationflags=0 if sys.platform != 'win32' else subprocess.CREATE_NO_WINDOW)
-        return outname
+        return tmp_dir + '/' + outname
     except Exception as e:
         print(e)
         raise 
@@ -189,7 +189,7 @@ def tts():
         print(e)
         return make_response(jsonify({"code":2,"msg":str(e)}), 500)  # 设置状态码为500
     else:
-        return send_file(f'{tmp_dir}/'+outname, mimetype='audio/x-wav')
+        return send_file(outname, mimetype='audio/x-wav')
     
 
 # 同一种语言音色克隆
@@ -211,7 +211,7 @@ def clone_eq():
     except Exception as e:
         return make_response(jsonify({"code":5,"msg":str(e)}), 500)  # 设置状态码为500
     else:
-        return send_file(f'{tmp_dir}/'+outname, mimetype='audio/x-wav')
+        return send_file(outname, mimetype='audio/x-wav')
 
 # 跨语言文字合成语音        
 @app.route('/clone_mul', methods=['GET', 'POST'])        
@@ -232,7 +232,7 @@ def clone_mul():
     except Exception as e:
         return make_response(jsonify({"code":8,"msg":str(e)}), 500)  # 设置状态码为500
     else:
-        return send_file(f'{tmp_dir}/'+outname, mimetype='audio/x-wav')
+        return send_file(outname, mimetype='audio/x-wav')
         
 if __name__=='__main__':
     host='127.0.0.1'
