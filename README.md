@@ -13,6 +13,14 @@
 3. 启动api服务，`python api.py`
 4. 如果要合成多行文本，需要提前安装 ffmpeg
 
+
+## 在其他整合包中时
+
+1. 首先确保整合包可以正常运行webui
+2. 复制此api.py到整合包内
+3. 查看整合包内的python路径，执行 `python api.py`, 如果整合包内存在 bat 文件，可以记事本打开，查看 python.exe 所在路径，例如路径为 '.\py311\python.exe',那么执行命令`.\py311\python.exe api.py` 
+
+
 ## 接口信息
 
 默认接口地址是 `http://127.0.0.1:9233`

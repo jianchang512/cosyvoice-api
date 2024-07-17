@@ -2,11 +2,8 @@ import os,time,sys
 from flask import Flask, request, render_template, jsonify,  send_from_directory,send_file,Response, stream_with_context,make_response
 import logging
 from logging.handlers import RotatingFileHandler
-from waitress import serve
 import subprocess
 import shutil
-
-
 import datetime
 from modelscope import snapshot_download
 from cosyvoice.cli.cosyvoice import CosyVoice
@@ -24,13 +21,16 @@ print(f'{logs_dir=}')
 os.makedirs(tmp_dir,exist_ok=True)
 os.makedirs(logs_dir,exist_ok=True)
 os.makedirs(f'{root_dir}/pretrained_models',exist_ok=True)
+sys.path.append('{}/third_party/Matcha-TTS'.format(root_dir))
 
-# ffmpeg
-if sys.platform == 'win32':
-    os.environ['PATH'] = f'{root_dir}/third_party/Matcha-TTS;' + os.environ['PATH']
-
+if sys.platform=='win32':
+    os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ';third_party\\Matcha-TTS'
 else:
-    os.environ['PATH'] =  f'{root_dir}/third_party/Matcha-TTS:' +  os.environ['PATH']
+    os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ':third_party/Matcha-TTS'
+
+
+
+
 
 if not os.path.exists('pretrained_models/CosyVoice-300M/cosyvoice.yaml') or not os.path.exists('pretrained_models/CosyVoice-300M-SFT/cosyvoice.yaml'):
     snapshot_download('iic/CosyVoice-300M', cache_dir='pretrained_models/CosyVoice-300M',local_dir='pretrained_models/CosyVoice-300M')
@@ -245,7 +245,13 @@ if __name__=='__main__':
     host='127.0.0.1'
     port=9233
     print(f'\n启动api:http://{host}:{port}\n')
-    serve(app,host=host, port=port)
+    try:
+        from waitress import serve
+    except Exception:
+        app.run(host=host, port=port)
+    else:
+        serve(app,host=host, port=port)
+    
 
 '''
 
