@@ -16,9 +16,12 @@
 
 ## 在其他整合包中时
 
+>如果使用的是 https://github.com/v3ucn/CosyVoice_For_Windows 这个整合包，那么下载本项目的`api.py`文件，替换原整合包里的`api.py`文件，然后双击 `启动接口服务.bat` 
+
 1. 首先确保整合包可以正常运行webui
 2. 复制此api.py到整合包内
 3. 查看整合包内的python路径，执行 `python api.py`, 如果整合包内存在 bat 文件，可以记事本打开，查看 python.exe 所在路径，例如路径为 '.\py311\python.exe',那么执行命令`.\py311\python.exe api.py` 
+
 
 
 ## 接口信息
