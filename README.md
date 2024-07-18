@@ -14,7 +14,44 @@
 4. 如果要合成多行文本，需要提前安装 ffmpeg
 
 
-## 在其他整合包中时
+
+
+# 在 [pyVideoTrans视频翻译软件](https://github.com/jianchang512/pyvideotrans) 中使用
+![image](https://github.com/user-attachments/assets/cb53d9a9-9030-4227-ad94-e8b6b435dbcf)
+
+
+1. 首先升级视频翻译软件到2.08+
+2. 确保已部署CosyVoice项目，已将 CosyVoice-api中的api.py放入，并成功启动了 api.py。
+3. 打开视频翻译软件，左上角设置--CosyVoice：填写 api 地址，默认是 `http://127.0.0.1:9233`
+4. 填写参考音频和音频对应文字 
+
+```
+参考音频填写：
+
+每行都由#符号分割为两部分，第一部分是wav音频路径，第二部分是该音频对应的文字内容，可填写多行。
+
+wav音频最佳时长5-15s，如果音频放在了CosyVoice项目的根路径下，即webui.py同目录下，这里直接填写名称即可.
+如果放在了根目录下的wavs目录下，那么需要填写 wavs/音频名称.wav
+
+参考音频填写示例：
+
+1.wav#你好啊亲爱的朋友
+wavs/2.wav#你好啊朋友们
+
+```
+5. 填写完毕后，主界面中配音渠道选择 CosyVoice, 角色选择对应的即可。其中 clone 角色是复制原视频中的音色
+
+> **2.11版起，pyVideoTrans视频翻译软件已支持使用 [v3ucn/CosyVoice_For_Windows整合包](https://github.com/v3ucn/CosyVoice_For_Windows) 的 api 接口，可直接填写该整合包的api地址，默认`http://127.0.0.1:9880`,注意端口`9880`不可更改，以此判断是整合包的api接口, 角色名仍按上方参考音频方式填写，即`角色名#对应文本可随便填`**
+
+
+----
+
+----
+
+## 在其他整合包中使用该api
+
+**建议该 api.py 配合 conda 源码部署后使用，如果用于第三方整合包，可能存在兼容问题，Win上conda部署CosyVoice方法 https://juejin.cn/post/7389946395066368035**
+
 
 >如果使用的是 https://github.com/v3ucn/CosyVoice_For_Windows 这个整合包，那么下载本项目的`api.py`文件，替换原整合包里的`api.py`文件，然后用记事本打开 `启动接口服务.bat` ，将倒数第三行开头的`@REM`删掉,保存后双击该bat文件启动。如下图
 >![image](https://github.com/user-attachments/assets/a4ee924e-f210-48e4-a0c2-09e881a36cf6)
@@ -23,6 +60,11 @@
 1. 首先确保整合包可以正常运行webui
 2. 复制此api.py到整合包内
 3. 查看整合包内的python路径，执行 `python api.py`, 如果整合包内存在 bat 文件，可以记事本打开，查看 python.exe 所在路径，例如路径为 '.\py311\python.exe',那么执行命令`.\py311\python.exe api.py` 
+
+
+
+
+
 
 
 
