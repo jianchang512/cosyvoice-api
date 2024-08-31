@@ -149,7 +149,7 @@ def batch(tts_type,outname,params):
         print(f'{t=}\n{tmp_name=},\n{tts_type=}\n{params=}')
         if tts_type=='tts':
             # 仅文字合成语音
-            output = tts_model.inference_sft(t, params['role'])
+            output = tts_model.inference_sft(t, params['role'],stream=False)
             print(output)
         elif tts_type=='clone_eq':
             # 同语言克隆
