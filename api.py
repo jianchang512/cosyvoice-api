@@ -128,6 +128,14 @@ def get_params(req):
     return params
 
 
+def del_tmp_files(tmp_files: list):
+    print('正在删除缓存文件...')
+    for f in tmp_files:
+        if os.path.exists(f):
+            print('删除缓存文件:', f)
+            os.remove(f)
+
+
 # 实际批量合成完毕后连接为一个文件
 def batch(tts_type,outname,params):
     text=params['text'].strip().split("\n")
@@ -161,12 +169,14 @@ def batch(tts_type,outname,params):
     if len(out_list)==0:
         raise Exception('合成失败')
     if len(out_list)==1:
+        print(f"音频文件生成成功：{out_list[0]}")
         return out_list[0]
     # 将 多个音频片段连接
     txt_tmp="\n".join([f"file '{it}'" for it in out_list])
     txt_name=f'{time.time()}.txt'
     with open(f'{tmp_dir}/{txt_name}','w',encoding='utf-8') as f:
         f.write(txt_tmp)
+    out_list.append(f'{tmp_dir}/{txt_name}')
     try:
         subprocess.run(["ffmpeg","-hide_banner", "-ignore_unknown","-y","-f","concat","-safe","0","-i",f'{tmp_dir}/{txt_name}',"-c:a","copy",tmp_dir + '/' + outname],
                    stdout=subprocess.PIPE,
@@ -175,10 +185,14 @@ def batch(tts_type,outname,params):
                    check=True,
                    text=True,
                    creationflags=0 if sys.platform != 'win32' else subprocess.CREATE_NO_WINDOW)
-        return tmp_dir + '/' + outname
     except Exception as e:
+        del_tmp_files(out_list)
         print(e)
-        raise 
+        raise
+    else:
+        del_tmp_files(out_list)
+        print(f"音频文件生成成功：{tmp_dir}/{outname}")
+        return tmp_dir + '/' + outname
 
 
 # 单纯文字合成语音
