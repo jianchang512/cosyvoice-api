@@ -158,13 +158,15 @@ def batch(tts_type,outname,params):
         if tts_type=='tts':
             # 仅文字合成语音
             output = tts_model.inference_sft(t, params['role'],stream=False)
-            print(output)
         elif tts_type=='clone_eq':
             # 同语言克隆
             output=clone_model.inference_zero_shot(t,params['reference_text'], prompt_speech_16k)
         else:
             output = clone_model.inference_cross_lingual(f'<|{params["lang"]}|>{t}', prompt_speech_16k)
-        torchaudio.save(tmp_name, output['tts_speech'], 22050)
+        try:
+            torchaudio.save(tmp_name, output['tts_speech'], 22050)
+        except TypeError as e:
+            torchaudio.save(tmp_name, list(output)[0]['tts_speech'], 22050)
         out_list.append(tmp_name)
     if len(out_list)==0:
         raise Exception('合成失败')
