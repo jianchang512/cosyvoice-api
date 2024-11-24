@@ -8,7 +8,7 @@
 
 **Window10/11 可直接下载整合包，解压后，双击`run-api.bat`可运行api服务，双击`run-webui.bat`可打开web界面**
 
-整合包下载地址 https://www.123684.com/s/03Sxjv-VSjB3
+整合包下载地址 https://github.com/jianchang512/cosyvoice-api/releases/tag/0.2
 
 
 其他系统请先部署好 CosyVoice，具体部署方法参考 [CosyVoice](https://github.com/FunAudioLLM/CosyVoice)
