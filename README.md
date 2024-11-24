@@ -6,12 +6,17 @@
 
 ## 使用方法
 
-> 先部署好 CosyVoice，具体部署方法参考 [CosyVoice](https://github.com/FunAudioLLM/CosyVoice)，如果是windows部署，可参考博客文章 https://juejin.cn/post/7389946395066368035
+**Window10/11 可直接下载整合包，解压后，双击`run-api.bat`可运行api服务，双击`run-webui.bat`可打开web界面**
+
+整合包下载地址 https://www.123684.com/s/03Sxjv-VSjB3
+
+
+其他系统请先部署好 CosyVoice，具体部署方法参考 [CosyVoice](https://github.com/FunAudioLLM/CosyVoice)
 
 1. 下载本仓库中 api.py 文件，然后复制到 CosyVoice 项目下同 webui.py 放于同一目录中
 2. 安装模块 `flask`和`waitress`, 安装命令 `pip install flask waitress`
 3. 启动api服务，`python api.py`
-4. 如果要合成多行文本，需要提前安装 ffmpeg
+4. 需要提前安装 ffmpeg
 
 
 
@@ -41,28 +46,11 @@ wavs/2.wav#你好啊朋友们
 ```
 5. 填写完毕后，主界面中配音渠道选择 CosyVoice, 角色选择对应的即可。其中 clone 角色是复制原视频中的音色
 
-> **2.11版起，pyVideoTrans视频翻译软件已支持使用 [v3ucn/CosyVoice_For_Windows整合包](https://github.com/v3ucn/CosyVoice_For_Windows) 的 api 接口，可直接填写该整合包的api地址，默认`http://127.0.0.1:9880`,注意端口`9880`不可更改，以此判断是整合包的api接口, 角色名仍按上方参考音频方式填写，即`角色名#对应文本可随便填`**
 
 
 ----
 
 ----
-
-## 在其他整合包中使用该api
-
-**建议该 api.py 配合 conda 源码部署后使用，如果用于第三方整合包，可能存在兼容问题，Win上conda部署CosyVoice方法 https://juejin.cn/post/7389946395066368035**
-
-
->如果使用的是 https://github.com/v3ucn/CosyVoice_For_Windows 这个整合包，那么下载本项目的`api.py`文件，替换原整合包里的`api.py`文件，然后用记事本打开 `启动接口服务.bat` ，将倒数第三行开头的`@REM`删掉,保存后双击该bat文件启动。如下图
->![image](https://github.com/user-attachments/assets/a4ee924e-f210-48e4-a0c2-09e881a36cf6)
-
-
-1. 首先确保整合包可以正常运行webui
-2. 复制此api.py到整合包内
-3. 查看整合包内的python路径，执行 `python api.py`, 如果整合包内存在 bat 文件，可以记事本打开，查看 python.exe 所在路径，例如路径为 '.\py311\python.exe',那么执行命令`.\py311\python.exe api.py` 
-
-
-
 
 
 

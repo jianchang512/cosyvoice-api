@@ -1,6 +1,20 @@
 import requests
 
+import os,time,sys
+from pathlib import Path
+ROOT_DIR=Path(__file__).parent.as_posix()
 
+# ffmpeg
+if sys.platform == 'win32':
+    os.environ['PATH'] = ROOT_DIR + f';{ROOT_DIR}\\ffmpeg;' + os.environ['PATH']
+else:
+    os.environ['PATH'] = ROOT_DIR + f':{ROOT_DIR}/ffmpeg:' + os.environ['PATH']
+    
+os.environ['MODELSCOPE_CACHE'] = ROOT_DIR + "/models"
+os.environ['HF_HOME'] = ROOT_DIR + "/models"
+os.environ['HF_HUB_DISABLE_SYMLINKS_WARNING'] = 'true'
+os.environ['HF_HOME']=Path(f"{ROOT_DIR}/models").as_posix()
+Path(os.environ['HF_HOME']).mkdir(parents=True, exist_ok=True)
 
 # test 单纯文字合成
 def api1():
@@ -16,7 +30,7 @@ def api1():
         print(response.json())
     else:
         # 返回的wav数据流，可直接保存
-        with open("./1.wav",'wb') as f:
+        with open("./api1.wav",'wb') as f:
             f.write(response.content)
 
 # 同语言克隆
@@ -34,7 +48,7 @@ def api2():
         print(response.json())
     else:
         # 返回的wav数据流，可直接保存
-        with open("./2.wav",'wb') as f:
+        with open("./api2.wav",'wb') as f:
             f.write(response.content)
 
 
@@ -53,9 +67,10 @@ def api3():
         print(response.json())
     else:
         # 返回的wav数据流，可直接保存
-        with open("./3.wav",'wb') as f:
+        with open("./api3.wav",'wb') as f:
             f.write(response.content)
 
 
-if __name__=='__main__':
-    api3()
+api1()
+api2()
+api3()

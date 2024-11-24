@@ -1,4 +1,38 @@
 import os,time,sys
+import os,time,sys
+from pathlib import Path
+root_dir=Path(__file__).parent.as_posix()
+
+# ffmpeg
+if sys.platform == 'win32':
+    os.environ['PATH'] = root_dir + f';{root_dir}\\ffmpeg;' + os.environ['PATH']
+else:
+    os.environ['PATH'] = root_dir + f':{root_dir}/ffmpeg:' + os.environ['PATH']
+    
+os.environ['MODELSCOPE_CACHE'] = root_dir + "/models"
+os.environ['HF_HOME'] = root_dir + "/models"
+os.environ['HF_HUB_DISABLE_SYMLINKS_WARNING'] = 'true'
+os.environ['HF_HOME']=Path(f"{root_dir}/models").as_posix()
+Path(os.environ['HF_HOME']).mkdir(parents=True, exist_ok=True)
+
+tmp_dir=Path(f'{root_dir}/tmp').as_posix()
+logs_dir=Path(f'{root_dir}/logs').as_posix()
+print(f'{root_dir=}')
+print(f'{tmp_dir=}')
+print(f'{logs_dir=}')
+os.makedirs(tmp_dir,exist_ok=True)
+os.makedirs(logs_dir,exist_ok=True)
+os.makedirs(f'{root_dir}/pretrained_models',exist_ok=True)
+sys.path.append('{}/third_party/Matcha-TTS'.format(root_dir))
+
+
+if sys.platform=='win32':
+    os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ';third_party\\Matcha-TTS'
+else:
+    os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ':third_party/Matcha-TTS'
+
+
+
 from flask import Flask, request, render_template, jsonify,  send_from_directory,send_file,Response, stream_with_context,make_response
 import logging
 from logging.handlers import RotatingFileHandler
@@ -11,22 +45,6 @@ from cosyvoice.utils.file_utils import load_wav
 import torchaudio
 from pathlib import Path
 import base64
-
-root_dir=Path(os.getcwd()).as_posix()
-tmp_dir=Path(f'{root_dir}/tmp').as_posix()
-logs_dir=Path(f'{root_dir}/logs').as_posix()
-print(f'{root_dir=}')
-print(f'{tmp_dir=}')
-print(f'{logs_dir=}')
-os.makedirs(tmp_dir,exist_ok=True)
-os.makedirs(logs_dir,exist_ok=True)
-os.makedirs(f'{root_dir}/pretrained_models',exist_ok=True)
-sys.path.append('{}/third_party/Matcha-TTS'.format(root_dir))
-
-if sys.platform=='win32':
-    os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ';third_party\\Matcha-TTS'
-else:
-    os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ':third_party/Matcha-TTS'
 
 
 
@@ -138,63 +156,41 @@ def del_tmp_files(tmp_files: list):
 
 # 实际批量合成完毕后连接为一个文件
 def batch(tts_type,outname,params):
-    text=params['text'].strip().split("\n")
-    text=[t.replace("。",'，') for t in text]
-    if len(text)>1 and not shutil.which("ffmpeg"):
-        raise Exception('多行文本合成必须安装 ffmpeg')
-    
-    # 按行合成
-    out_list=[]
+    if not shutil.which("ffmpeg"):
+        raise Exception('必须安装 ffmpeg')    
     prompt_speech_16k=None
     if tts_type!='tts':
         if not params['reference_audio'] or not os.path.exists(f"{root_dir}/{params['reference_audio']}"):
             raise Exception(f'参考音频未传入或不存在 {params["reference_audio"]}')
-        prompt_speech_16k = load_wav(params['reference_audio'], 16000)
-    for i,t in enumerate(text):
-        if not t.strip():
-            continue
-        tmp_name=f"{tmp_dir}/{time.time()}-{i}-{tts_type}.wav"
-        print(f'{t=}\n{tmp_name=},\n{tts_type=}\n{params=}')
-        if tts_type=='tts':
-            # 仅文字合成语音
-            output = tts_model.inference_sft(t, params['role'],stream=False)
-        elif tts_type=='clone_eq':
-            # 同语言克隆
-            output=clone_model.inference_zero_shot(t,params['reference_text'], prompt_speech_16k)
-        else:
-            output = clone_model.inference_cross_lingual(f'<|{params["lang"]}|>{t}', prompt_speech_16k)
+        ref_audio=f"{tmp_dir}/-refaudio-{time.time()}.wav" 
         try:
-            torchaudio.save(tmp_name, output['tts_speech'], 22050)
-        except TypeError as e:
-            torchaudio.save(tmp_name, list(output)[0]['tts_speech'], 22050)
-        out_list.append(tmp_name)
-    if len(out_list)==0:
-        raise Exception('合成失败')
-    if len(out_list)==1:
-        print(f"音频文件生成成功：{out_list[0]}")
-        return out_list[0]
-    # 将 多个音频片段连接
-    txt_tmp="\n".join([f"file '{it}'" for it in out_list])
-    txt_name=f'{time.time()}.txt'
-    with open(f'{tmp_dir}/{txt_name}','w',encoding='utf-8') as f:
-        f.write(txt_tmp)
-    out_list.append(f'{tmp_dir}/{txt_name}')
-    try:
-        subprocess.run(["ffmpeg","-hide_banner", "-ignore_unknown","-y","-f","concat","-safe","0","-i",f'{tmp_dir}/{txt_name}',"-c:a","copy",tmp_dir + '/' + outname],
+            subprocess.run(["ffmpeg","-hide_banner", "-ignore_unknown","-y","-i",params['reference_audio'],"-ar","16000",ref_audio],
                    stdout=subprocess.PIPE,
                    stderr=subprocess.PIPE,
                    encoding="utf-8",
                    check=True,
                    text=True,
                    creationflags=0 if sys.platform != 'win32' else subprocess.CREATE_NO_WINDOW)
-    except Exception as e:
-        del_tmp_files(out_list)
-        print(e)
-        raise
+        except Exception as e:
+            raise Exception(f'处理参考音频失败:{e}')
+        
+        prompt_speech_16k = load_wav(ref_audio, 16000)
+
+    text=params['text']
+    if tts_type=='tts':
+        # 仅文字合成语音
+        output = tts_model.inference_sft(text, params['role'],stream=False)
+    elif tts_type=='clone_eq':
+        # 同语言克隆
+        output=clone_model.inference_zero_shot(text,params['reference_text'],prompt_speech_16k)
     else:
-        del_tmp_files(out_list)
-        print(f"音频文件生成成功：{tmp_dir}/{outname}")
-        return tmp_dir + '/' + outname
+        output = clone_model.inference_cross_lingual(f'<|{params["lang"]}|>{text}', prompt_speech_16k)
+    
+    torchaudio.save(tmp_dir + '/' + outname, list(output)[0]['tts_speech'], 22050)
+    
+    
+    print(f"音频文件生成成功：{tmp_dir}/{outname}")
+    return tmp_dir + '/' + outname
 
 
 # 单纯文字合成语音
