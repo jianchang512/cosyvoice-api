@@ -6,7 +6,12 @@ __pycache__/
 # Visual Studio Code files
 .vscode
 .vs
-
+*.mp3
+*.wav
+*.log
+*.bat
+test-*
+runtime
 # PyCharm files
 .idea
 
