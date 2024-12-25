@@ -3,6 +3,7 @@
 
 如果是三方整合包，将 `api.py` 同 bat 脚本放在一起，然后查找其中`python.exe`所在的位置，在bat所在当前文件夹地址栏中输入`cmd`回车，然后执行 `目录/python.exe api.py`
 
+如果执行时提示`module flask not found`,请执行 ` python.exe -m pip install flask` 安装
 
 
 ## 根据内置角色合成文字
