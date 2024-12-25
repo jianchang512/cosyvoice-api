@@ -283,7 +283,7 @@ def audio_speech():
         outname=batch(tts_type=api_name,outname=filename,params=params)
         return send_file(outname, mimetype='audio/x-wav')
     except Exception as e:
-        return jsonify({"error": {"message": f"{e}", "type": e.__class__.__name__, "param": f'speed={rate},voice={voice},input={text}', "code": 400}}), 500
+        return jsonify({"error": {"message": f"{e}", "type": e.__class__.__name__, "param": f'speed={speed},voice={voice},input={text}', "code": 400}}), 500
      
 if __name__=='__main__':
     host='127.0.0.1'
