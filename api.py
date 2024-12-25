@@ -263,7 +263,7 @@ def audio_speech():
     
 
     text = data.get('input')
-    speed = int((float(data.get('speed',1.0))-1.0) *100)
+    speed =  float(data.get('speed',1.0))
     
     voice = data.get('voice','中文女')
     params['text']=text
