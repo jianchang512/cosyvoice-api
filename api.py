@@ -188,7 +188,13 @@ def batch(tts_type,outname,params):
             audio_list.append(j['tts_speech'])
     audio_data = torch.concat(audio_list, dim=1)
     
-    torchaudio.save(tmp_dir + '/' + outname,audio_data, 22050, format="wav")   
+    # 根据模型yaml配置设置采样率
+    if tts_type=='tts':
+        torchaudio.save(tmp_dir + '/' + outname,audio_data, 22050, format="wav")   
+    elif tts_type=='clone_eq':
+        torchaudio.save(tmp_dir + '/' + outname,audio_data, 24000, format="wav")   
+    else:
+        torchaudio.save(tmp_dir + '/' + outname,audio_data, 24000, format="wav")    
     
     print(f"音频文件生成成功：{tmp_dir}/{outname}")
     return tmp_dir + '/' + outname
