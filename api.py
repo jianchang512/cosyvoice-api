@@ -252,6 +252,8 @@ def audio_speech():
     """
     兼容 OpenAI /v1/audio/speech API 的接口
     """
+    import random
+
     if not request.is_json:
         return jsonify({"error": "请求必须是 JSON 格式"}), 400
 
@@ -266,6 +268,7 @@ def audio_speech():
     speed =  float(data.get('speed',1.0))
     
     voice = data.get('voice','中文女')
+    params = {}
     params['text']=text
     params['speed']=speed
     api_name='tts'
@@ -284,7 +287,7 @@ def audio_speech():
         return send_file(outname, mimetype='audio/x-wav')
     except Exception as e:
         return jsonify({"error": {"message": f"{e}", "type": e.__class__.__name__, "param": f'speed={speed},voice={voice},input={text}', "code": 400}}), 500
-     
+         
 if __name__=='__main__':
     host='127.0.0.1'
     port=9233
